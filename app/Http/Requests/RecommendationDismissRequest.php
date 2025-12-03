@@ -20,7 +20,7 @@ class RecommendationDismissRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id' => ['required'],
+            'id' => ['required', 'integer', 'exists:recommendations,id'],
         ];
     }
 }

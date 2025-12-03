@@ -20,10 +20,10 @@ class AuthUpdateUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required'],
-            'email' => ['required'],
-            'timezone' => ['required'],
-            'language' => ['required'],
+            'name' => ['sometimes', 'string', 'max:255'],
+            'email' => ['sometimes', 'string', 'email', 'max:255', 'unique:users,email,'.$this->user()->id],
+            'timezone' => ['sometimes', 'nullable', 'string', 'timezone:all'],
+            'language' => ['sometimes', 'nullable', 'string', 'in:en,uk'],
         ];
     }
 }

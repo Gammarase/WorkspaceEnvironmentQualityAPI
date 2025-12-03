@@ -28,3 +28,8 @@ Thumbs.db
 docker-compose.override.yml
 /draft.yaml
 /.blueprint
+
+#Agents
+CLAUDE.md
+boost.json
+.mcp.json

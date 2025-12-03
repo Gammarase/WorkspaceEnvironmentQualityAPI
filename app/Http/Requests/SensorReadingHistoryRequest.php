@@ -21,20 +21,8 @@ class SensorReadingHistoryRequest extends FormRequest
     {
         return [
             'device_id' => ['required', 'integer', 'exists:devices,id'],
-            'device_id' => ['required', 'integer', 'exists:devices,id'],
-            'temperature' => ['required', 'numeric', 'between:-999.99,999.99'],
-            'humidity' => ['required', 'numeric', 'between:-999.99,999.99'],
-            'tvoc_ppm' => ['nullable', 'integer', 'gt:0'],
-            'light' => ['required', 'integer', 'gt:0'],
-            'noise' => ['required', 'integer', 'gt:0'],
-            'reading_timestamp' => ['required'],
-            'device_id' => ['required', 'integer', 'exists:devices,id'],
-            'temperature' => ['required', 'numeric', 'between:-999.99,999.99'],
-            'humidity' => ['required', 'numeric', 'between:-999.99,999.99'],
-            'tvoc_ppm' => ['nullable', 'integer', 'gt:0'],
-            'light' => ['required', 'integer', 'gt:0'],
-            'noise' => ['required', 'integer', 'gt:0'],
-            'reading_timestamp' => ['required'],
+            'start_date' => ['required', 'date'],
+            'end_date' => ['required', 'date', 'after_or_equal:start_date'],
         ];
     }
 }

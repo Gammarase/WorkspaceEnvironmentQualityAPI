@@ -6,29 +6,36 @@ use App\Http\Controllers\RecommendationController;
 use App\Http\Controllers\SensorReadingController;
 use Illuminate\Support\Facades\Route;
 
-// Auth
+// Public Auth Routes
 Route::prefix('auths')->controller(AuthController::class)->group(function () {
-    Route::get('register', 'register');
-    Route::get('login', 'login');
-    Route::get('logout', 'logout');
+    Route::post('register', 'register');
+    Route::post('login', 'login');
+});
+
+// Protected Auth Routes
+Route::prefix('auths')->controller(AuthController::class)->middleware('auth:sanctum')->group(function () {
+    Route::delete('logout', 'logout');
     Route::get('get-user', 'getUser');
-    Route::get('update-user', 'updateUser');
+    Route::patch('update-user', 'updateUser');
 });
 
-// Devices
-Route::resource('devices', DeviceController::class)->except(['create', 'edit']);
+// Protected Routes
+Route::middleware('auth:sanctum')->group(function () {
+    // Devices
+    Route::resource('devices', DeviceController::class)->except(['create', 'edit']);
 
-// Sensor readings
-Route::prefix('sensor-readings')->controller(SensorReadingController::class)->group(function () {
-    Route::get('current', 'current');
-    Route::get('history', 'history');
-});
-Route::resource('sensor-readings', SensorReadingController::class)->only(['store']);
+    // Sensor readings
+    Route::prefix('sensor-readings')->controller(SensorReadingController::class)->group(function () {
+        Route::get('current', 'current');
+        Route::get('history', 'history');
+    });
+    Route::resource('sensor-readings', SensorReadingController::class)->only(['store']);
 
-// Recommendations
-Route::prefix('recommendations')->controller(RecommendationController::class)->group(function () {
-    Route::get('acknowledge', 'acknowledge');
-    Route::get('dismiss', 'dismiss');
-    Route::get('pending', 'pending');
+    // Recommendations
+    Route::prefix('recommendations')->controller(RecommendationController::class)->group(function () {
+        Route::patch('acknowledge', 'acknowledge');
+        Route::patch('dismiss', 'dismiss');
+        Route::get('pending', 'pending');
+    });
+    Route::resource('recommendations', RecommendationController::class)->only(['index', 'show']);
 });
-Route::resource('recommendations', RecommendationController::class)->only(['index', 'show']);

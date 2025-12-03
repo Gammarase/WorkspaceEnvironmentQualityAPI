@@ -24,7 +24,7 @@ return new class extends Migration
             $table->decimal('outdoor_pm25', 6, 2)->nullable();
             $table->decimal('outdoor_pm10', 6, 2)->nullable();
             $table->string('weather_condition', 100)->nullable();
-            $table->enum('source', ['openweathermap', 'airvisual', 'iqair']);
+            $table->enum('source', ['openweathermap', 'airvisual', 'iqair', 'weatherapi']);
             $table->timestamp('fetched_at');
             $table->timestamps();
         });

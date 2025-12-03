@@ -20,11 +20,11 @@ class AuthRegisterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required'],
-            'email' => ['required'],
-            'password' => ['required'],
-            'timezone' => ['required'],
-            'language' => ['required'],
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:8'],
+            'timezone' => ['nullable', 'string', 'timezone:all'],
+            'language' => ['nullable', 'string', 'in:en,uk'],
         ];
     }
 }

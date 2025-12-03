@@ -26,6 +26,7 @@ class SensorReadingStoreRequest extends FormRequest
             'tvoc_ppm' => ['nullable', 'integer', 'gt:0'],
             'light' => ['required', 'integer', 'gt:0'],
             'noise' => ['required', 'integer', 'gt:0'],
+            'reading_timestamp' => ['nullable', 'date', 'before_or_equal:now'],
         ];
     }
 }

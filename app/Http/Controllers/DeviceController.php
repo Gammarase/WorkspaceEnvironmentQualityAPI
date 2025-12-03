@@ -7,6 +7,7 @@ use App\Http\Requests\DeviceUpdateRequest;
 use App\Http\Resources\DeviceCollection;
 use App\Http\Resources\DeviceResource;
 use App\Models\Device;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -14,34 +15,47 @@ class DeviceController extends Controller
 {
     public function index(Request $request): DeviceCollection
     {
-        $devices = Device::where('user_id', $user_id)->get();
+        $devices = $request->user()->devices()->with('recommendations')->get();
 
-        return new DeviceCollection($Device);
+        return new DeviceCollection($devices);
     }
 
-    public function store(DeviceStoreRequest $request): DeviceResource
+    public function store(DeviceStoreRequest $request): JsonResponse
     {
-        $device = Device::create($request->validated());
+        $validated = $request->validated();
+        $validated['user_id'] = $request->user()->id;
 
-        return new DeviceResource($Device);
+        $device = Device::create($validated);
+
+        return response()->json(new DeviceResource($device), 201);
     }
 
     public function show(Request $request, Device $device): DeviceResource
     {
-        $device = Device::find($id);
+        if ($device->user_id !== $request->user()->id) {
+            abort(403, 'Unauthorized');
+        }
 
-        return new DeviceResource($Device);
+        return new DeviceResource($device);
     }
 
     public function update(DeviceUpdateRequest $request, Device $device): DeviceResource
     {
+        if ($device->user_id !== $request->user()->id) {
+            abort(403, 'Unauthorized');
+        }
+
         $device->update($request->validated());
 
-        return new DeviceResource($Device);
+        return new DeviceResource($device);
     }
 
     public function destroy(Request $request, Device $device): Response
     {
+        if ($device->user_id !== $request->user()->id) {
+            abort(403, 'Unauthorized');
+        }
+
         $device->delete();
 
         return response()->noContent();

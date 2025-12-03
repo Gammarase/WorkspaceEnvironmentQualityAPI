@@ -6,40 +6,60 @@ use App\Http\Requests\AuthLoginRequest;
 use App\Http\Requests\AuthRegisterRequest;
 use App\Http\Requests\AuthUpdateUserRequest;
 use App\Http\Resources\UserResource;
-use App\Models\Email;
+use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    public function register(AuthRegisterRequest $request)
+    public function register(AuthRegisterRequest $request): JsonResponse
     {
-        $user->save();
+        $user = User::create($request->validated());
 
-        return $token;
+        $token = $user->createToken('api-token')->plainTextToken;
+
+        return response()->json([
+            'user' => new UserResource($user),
+            'token' => $token,
+        ], 201);
     }
 
-    public function login(AuthLoginRequest $request)
+    public function login(AuthLoginRequest $request): JsonResponse
     {
-        $email = Email::find($email);
+        if (! Auth::attempt($request->only('email', 'password'))) {
+            return response()->json([
+                'message' => 'Invalid credentials',
+            ], 401);
+        }
 
-        return $token;
+        $user = Auth::user();
+        $token = $user->createToken('api-token')->plainTextToken;
+
+        return response()->json([
+            'user' => new UserResource($user),
+            'token' => $token,
+        ]);
     }
 
     public function logout(Request $request): Response
     {
+        $request->user()->currentAccessToken()->delete();
+
         return response()->noContent();
     }
 
     public function getUser(Request $request): UserResource
     {
-        return new UserResource($User);
+        return new UserResource($request->user());
     }
 
     public function updateUser(AuthUpdateUserRequest $request): UserResource
     {
+        $user = $request->user();
         $user->update($request->validated());
 
-        return new UserResource($User);
+        return new UserResource($user);
     }
 }
