@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class User extends Model
+class Device extends Model
 {
     use HasFactory, SoftDeletes;
 
@@ -17,20 +18,14 @@ class User extends Model
      * @var array
      */
     protected $fillable = [
-        'email',
+        'device_id',
+        'user_id',
         'name',
-        'password',
-        'timezone',
-        'language',
-    ];
-
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array
-     */
-    protected $hidden = [
-        'password',
+        'latitude',
+        'longitude',
+        'description',
+        'is_active',
+        'last_seen_at',
     ];
 
     /**
@@ -42,17 +37,22 @@ class User extends Model
     {
         return [
             'id' => 'integer',
+            'user_id' => 'integer',
+            'latitude' => 'decimal:8',
+            'longitude' => 'decimal:8',
+            'is_active' => 'boolean',
+            'last_seen_at' => 'timestamp',
         ];
     }
 
-    public function devices(): HasMany
+    public function user(): BelongsTo
     {
-        return $this->hasMany(Device::class);
+        return $this->belongsTo(User::class);
     }
 
-    public function alerts(): HasMany
+    public function sensorReadings(): HasMany
     {
-        return $this->hasMany(Alert::class);
+        return $this->hasMany(SensorReading::class);
     }
 
     public function recommendations(): HasMany
