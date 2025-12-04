@@ -13,6 +13,26 @@ use Illuminate\Http\Response;
 
 class DeviceController extends Controller
 {
+    /**
+     * @response array{
+     *   data: DeviceResource[],
+     *   links: array{
+     *     first: string,
+     *     last: string,
+     *     prev: string|null,
+     *     next: string|null
+     *   },
+     *   meta: array{
+     *     current_page: int,
+     *     from: int,
+     *     last_page: int,
+     *     path: string,
+     *     per_page: int,
+     *     to: int,
+     *     total: int
+     *   }
+     * }
+     */
     public function index(Request $request): DeviceCollection
     {
         $devices = $request->user()->devices()->with('recommendations')->get();

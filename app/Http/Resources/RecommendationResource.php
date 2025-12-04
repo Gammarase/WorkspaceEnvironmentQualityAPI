@@ -16,10 +16,19 @@ class RecommendationResource extends JsonResource
             'id' => $this->id,
             'device_id' => $this->device_id,
             'user_id' => $this->user_id,
+            /**
+             *Enum: `'ventilate'`, `'lighting'`, `'noise'`, `'break'`,`'temperature'`, `'humidity'`
+             */
             'type' => $this->type,
             'title' => $this->title,
             'message' => $this->message,
+            /**
+             *Enum: `'low'`, `'medium'`, `'high'`
+             */
             'priority' => $this->priority,
+            /**
+             *Enum: `'pending'`, `'acknowledged'`, `'dismissed'`
+             */
             'status' => $this->status,
             'metadata' => $this->metadata,
             'acknowledged_at' => $this->acknowledged_at,

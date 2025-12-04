@@ -12,6 +12,26 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class RecommendationController extends Controller
 {
+    /**
+     * @response array{
+     *   data: RecommendationResource[],
+     *   links: array{
+     *     first: string,
+     *     last: string,
+     *     prev: string|null,
+     *     next: string|null
+     *   },
+     *   meta: array{
+     *     current_page: int,
+     *     from: int,
+     *     last_page: int,
+     *     path: string,
+     *     per_page: int,
+     *     to: int,
+     *     total: int
+     *   }
+     * }
+     */
     public function index(Request $request): AnonymousResourceCollection
     {
         $recommendations = $request->user()->recommendations()
@@ -20,7 +40,7 @@ class RecommendationController extends Controller
             ->latest()
             ->paginate();
 
-        return RecommendationResource::collection($recommendations);
+        return new RecommendationCollection($recommendations);
     }
 
     public function show(Request $request, Recommendation $recommendation): RecommendationResource
@@ -64,6 +84,26 @@ class RecommendationController extends Controller
         return new RecommendationResource($recommendation);
     }
 
+    /**
+     * @response array{
+     *   data: RecommendationResource[],
+     *   links: array{
+     *     first: string,
+     *     last: string,
+     *     prev: string|null,
+     *     next: string|null
+     *   },
+     *   meta: array{
+     *     current_page: int,
+     *     from: int,
+     *     last_page: int,
+     *     path: string,
+     *     per_page: int,
+     *     to: int,
+     *     total: int
+     *   }
+     * }
+     */
     public function pending(Request $request): RecommendationCollection
     {
         $recommendations = $request->user()->recommendations()
