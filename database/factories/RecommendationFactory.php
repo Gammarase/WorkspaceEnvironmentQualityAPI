@@ -21,7 +21,7 @@ class RecommendationFactory extends Factory
             'message' => fake()->text(),
             'priority' => fake()->randomElement(['low', 'medium', 'high']),
             'status' => fake()->randomElement(['pending', 'acknowledged', 'dismissed']),
-            'metadata' => '{}',
+            'metadata' => [fake()->word() => fake()->word()],
             'acknowledged_at' => fake()->dateTime(),
             'dismissed_at' => fake()->dateTime(),
         ];

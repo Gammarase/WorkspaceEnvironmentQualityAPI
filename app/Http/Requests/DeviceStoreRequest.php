@@ -22,8 +22,8 @@ class DeviceStoreRequest extends FormRequest
         return [
             'device_id' => ['required', 'string', 'max:100', 'unique:devices,device_id'],
             'name' => ['required', 'string', 'max:255'],
-            'longitude' => ['nullable', 'numeric', 'between:-999.99999999,999.99999999'],
-            'latitude' => ['nullable', 'numeric', 'between:-99.99999999,99.99999999'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
             'description' => ['nullable', 'string'],
         ];
     }

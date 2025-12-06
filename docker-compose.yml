@@ -16,11 +16,6 @@ services:
       - .:/var/www/html
       - ./docker/octane.ini:/usr/local/etc/php/conf.d/octane.ini
     environment:
-      - DB_HOST=pgsql
-      - DB_DATABASE=${POSTGRES_DB:-workspaceenvironmentqualityapi}
-      - DB_USERNAME=${POSTGRES_USER:-workspaceapi}
-      - DB_PASSWORD=${POSTGRES_PASSWORD:-password}
-      - REDIS_HOST=redis
       - OCTANE_SERVER=swoole
       - OCTANE_HTTPS=false
       - OCTANE_HOST=0.0.0.0

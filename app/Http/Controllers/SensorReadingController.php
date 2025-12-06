@@ -8,6 +8,7 @@ use App\Http\Requests\SensorReadingStoreRequest;
 use App\Http\Resources\SensorReadingResource;
 use App\Models\Device;
 use App\Models\SensorReading;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
@@ -66,9 +67,9 @@ class SensorReadingController extends Controller
         }
 
         $sensorReadings = SensorReading::where('device_id', $validated['device_id'])
-            ->whereBetween('reading_timestamp', [$validated['start_date'], $validated['end_date']])
+            ->whereBetween('reading_timestamp', [Carbon::parse($validated['start_date']), Carbon::parse($validated['end_date'])->endOfDay()])
             ->orderBy('reading_timestamp', 'desc')
-            ->paginate(20);
+            ->get();
 
         return SensorReadingResource::collection($sensorReadings);
     }

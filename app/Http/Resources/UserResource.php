@@ -16,7 +16,7 @@ class UserResource extends JsonResource
             'id' => $this->id,
             'email' => $this->email,
             'name' => $this->name,
-            'timezone' => $this->timezone,
+            'timezone' => $this->timezone ?? config('app.timezone'),
             'language' => $this->language,
             'recommendations' => RecommendationCollection::make($this->whenLoaded('recommendations')),
         ];

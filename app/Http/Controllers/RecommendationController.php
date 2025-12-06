@@ -8,7 +8,6 @@ use App\Http\Resources\RecommendationCollection;
 use App\Http\Resources\RecommendationResource;
 use App\Models\Recommendation;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class RecommendationController extends Controller
 {
@@ -32,11 +31,10 @@ class RecommendationController extends Controller
      *   }
      * }
      */
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(Request $request): RecommendationCollection
     {
         $recommendations = $request->user()->recommendations()
             ->with('device')
-            ->orderByRaw("CASE priority WHEN 'high' THEN 1 WHEN 'medium' THEN 2 WHEN 'low' THEN 3 END")
             ->latest()
             ->paginate();
 
@@ -110,7 +108,7 @@ class RecommendationController extends Controller
             ->where('status', 'pending')
             ->orderByRaw("CASE priority WHEN 'high' THEN 1 WHEN 'medium' THEN 2 WHEN 'low' THEN 3 END")
             ->latest()
-            ->get();
+            ->paginate();
 
         return new RecommendationCollection($recommendations);
     }

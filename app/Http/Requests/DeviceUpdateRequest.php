@@ -21,10 +21,10 @@ class DeviceUpdateRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'longitude' => ['nullable', 'numeric', 'between:-999.99999999,999.99999999'],
-            'latitude' => ['nullable', 'numeric', 'between:-99.99999999,99.99999999'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
             'description' => ['nullable', 'string'],
-            'is_active' => ['required'],
+            'is_active' => ['nullable', 'boolean'],
         ];
     }
 }

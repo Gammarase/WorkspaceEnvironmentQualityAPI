@@ -2,97 +2,270 @@
 
 namespace Tests\Feature\Http\Controllers;
 
-use App\Models\Email;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
-use JMac\Testing\Traits\AdditionalAssertions;
-use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
-/**
- * @see \App\Http\Controllers\AuthController
- */
-final class AuthControllerTest extends TestCase
+class AuthControllerTest extends TestCase
 {
-    use AdditionalAssertions, RefreshDatabase, WithFaker;
+    use RefreshDatabase, WithFaker;
 
-    #[Test]
-    public function register_uses_form_request_validation(): void
+    public function test_user_can_register(): void
     {
-        $this->assertActionUsesFormRequest(
-            \App\Http\Controllers\AuthController::class,
-            'register',
-            \App\Http\Requests\AuthRegisterRequest::class
-        );
+        $response = $this->postJson(route('auths.register'), [
+            'name' => 'Test User',
+            'email' => 'test@example.com',
+            'password' => 'password123',
+            'timezone' => 'Europe/Kyiv',
+            'language' => 'uk',
+        ]);
+
+        $response->assertCreated()
+            ->assertJsonStructure([
+                'user' => ['id', 'name', 'email'],
+                'token',
+            ])
+            ->assertJson([
+                'user' => [
+                    'email' => 'test@example.com',
+                    'name' => 'Test User',
+                ],
+            ]);
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'test@example.com',
+            'name' => 'Test User',
+        ]);
     }
 
-    #[Test]
-    public function register_saves_and_responds_with(): void
+    public function test_user_can_register_with_null_timezone(): void
     {
-        $response = $this->get(route('auths.register'));
+        $response = $this->postJson(route('auths.register'), [
+            'name' => 'Test User',
+            'email' => 'test@example.com',
+            'password' => 'password123',
+            'timezone' => null,
+            'language' => 'uk',
+        ]);
 
-        $response->assertOk();
-        $response->assertJson($User, token);
+        $response->assertCreated()
+            ->assertJsonStructure([
+                'user' => ['id', 'name', 'email'],
+                'token',
+            ])
+            ->assertJson([
+                'user' => [
+                    'email' => 'test@example.com',
+                    'name' => 'Test User',
+                ],
+            ]);
 
-        $this->assertDatabaseHas(users, [/* ... */]);
+        $this->assertDatabaseHas('users', [
+            'email' => 'test@example.com',
+            'name' => 'Test User',
+        ]);
     }
 
-    #[Test]
-    public function login_uses_form_request_validation(): void
+    public function test_registration_validates_required_fields(): void
     {
-        $this->assertActionUsesFormRequest(
-            \App\Http\Controllers\AuthController::class,
-            'login',
-            \App\Http\Requests\AuthLoginRequest::class
-        );
+        $response = $this->postJson(route('auths.register'), []);
+
+        $response->assertUnprocessable()
+            ->assertJsonValidationErrors(['name', 'email', 'password']);
     }
 
-    #[Test]
-    public function login_responds_with(): void
+    public function test_registration_validates_email_uniqueness(): void
     {
-        $auth = Email::factory()->create();
+        User::factory()->create(['email' => 'existing@example.com']);
 
-        $response = $this->get(route('auths.login'));
+        $response = $this->postJson(route('auths.register'), [
+            'name' => 'Test User',
+            'email' => 'existing@example.com',
+            'password' => 'password123',
+        ]);
 
-        $response->assertOk();
-        $response->assertJson($User, token);
+        $response->assertUnprocessable()
+            ->assertJsonValidationErrors(['email']);
     }
 
-    #[Test]
-    public function logout_responds_with(): void
+    public function test_registration_validates_password_minimum_length(): void
     {
-        $response = $this->get(route('auths.logout'));
+        $response = $this->postJson(route('auths.register'), [
+            'name' => 'Test User',
+            'email' => 'test@example.com',
+            'password' => 'short',
+        ]);
 
-        $response->assertNoContent();
+        $response->assertUnprocessable()
+            ->assertJsonValidationErrors(['password']);
     }
 
-    #[Test]
-    public function get_user_behaves_as_expected(): void
+    public function test_registration_validates_timezone(): void
     {
-        $response = $this->get(route('auths.getUser'));
+        $response = $this->postJson(route('auths.register'), [
+            'name' => 'Test User',
+            'email' => 'test@example.com',
+            'password' => 'password123',
+            'timezone' => 'Invalid/Timezone',
+        ]);
 
-        $response->assertOk();
-        $response->assertJsonStructure([]);
+        $response->assertUnprocessable()
+            ->assertJsonValidationErrors(['timezone']);
     }
 
-    #[Test]
-    public function update_user_uses_form_request_validation(): void
+    public function test_user_can_login_with_valid_credentials(): void
     {
-        $this->assertActionUsesFormRequest(
-            \App\Http\Controllers\AuthController::class,
-            'updateUser',
-            \App\Http\Requests\AuthUpdateUserRequest::class
-        );
+        $user = User::factory()->create([
+            'email' => 'test@example.com',
+            'password' => 'password123',
+        ]);
+
+        $response = $this->postJson(route('auths.login'), [
+            'email' => 'test@example.com',
+            'password' => 'password123',
+        ]);
+
+        $response->assertOk()
+            ->assertJsonStructure([
+                'user' => ['id', 'name', 'email'],
+                'token',
+            ])
+            ->assertJson([
+                'user' => [
+                    'email' => 'test@example.com',
+                ],
+            ]);
     }
 
-    #[Test]
-    public function update_user_behaves_as_expected(): void
+    public function test_login_fails_with_invalid_credentials(): void
     {
-        $response = $this->get(route('auths.updateUser'));
+        $user = User::factory()->create([
+            'email' => 'test@example.com',
+            'password' => 'correctpassword',
+        ]);
 
-        $auth->refresh();
+        $response = $this->postJson(route('auths.login'), [
+            'email' => 'test@example.com',
+            'password' => 'wrongpassword',
+        ]);
 
-        $response->assertOk();
-        $response->assertJsonStructure([]);
+        $response->assertUnauthorized()
+            ->assertJson([
+                'message' => 'Invalid credentials',
+            ]);
+    }
+
+    public function test_login_fails_with_nonexistent_email(): void
+    {
+        $response = $this->postJson(route('auths.login'), [
+            'email' => 'nonexistent@example.com',
+            'password' => 'password123',
+        ]);
+
+        $response->assertUnauthorized();
+    }
+
+    public function test_authenticated_user_can_logout(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('test-token')->plainTextToken;
+
+        $this->withHeader('Authorization', 'Bearer '.$token)
+            ->deleteJson(route('auths.logout'))
+            ->assertNoContent();
+
+        $this->assertDatabaseMissing('personal_access_tokens', [
+            'tokenable_id' => $user->id,
+        ]);
+    }
+
+    public function test_logout_requires_authentication(): void
+    {
+        $response = $this->deleteJson(route('auths.logout'));
+
+        $response->assertUnauthorized();
+    }
+
+    public function test_authenticated_user_can_get_profile(): void
+    {
+        $user = User::factory()->create([
+            'name' => 'Test User',
+            'email' => 'test@example.com',
+        ]);
+
+        $response = $this->actingAsUser($user)
+            ->getJson(route('auths.get-user'));
+
+        $response->assertOk()
+            ->assertJsonStructure([
+                'data' => ['id', 'name', 'email', 'timezone', 'language'],
+            ])
+            ->assertJson([
+                'data' => [
+                    'email' => 'test@example.com',
+                    'name' => 'Test User',
+                ],
+            ]);
+    }
+
+    public function test_get_profile_requires_authentication(): void
+    {
+        $response = $this->getJson(route('auths.get-user'));
+
+        $response->assertUnauthorized();
+    }
+
+    public function test_authenticated_user_can_update_profile(): void
+    {
+        $user = User::factory()->create([
+            'name' => 'Old Name',
+            'email' => 'old@example.com',
+        ]);
+
+        $response = $this->actingAsUser($user)
+            ->patchJson(route('auths.update-user'), [
+                'name' => 'New Name',
+                'timezone' => 'America/New_York',
+            ]);
+
+        $response->assertOk()
+            ->assertJsonStructure([
+                'data' => ['id', 'name', 'email'],
+            ])
+            ->assertJson([
+                'data' => [
+                    'name' => 'New Name',
+                ],
+            ]);
+
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'name' => 'New Name',
+            'timezone' => 'America/New_York',
+        ]);
+    }
+
+    public function test_update_profile_validates_unique_email(): void
+    {
+        $existingUser = User::factory()->create(['email' => 'existing@example.com']);
+        $currentUser = User::factory()->create(['email' => 'current@example.com']);
+
+        $response = $this->actingAsUser($currentUser)
+            ->patchJson(route('auths.update-user'), [
+                'email' => 'existing@example.com',
+            ]);
+
+        $response->assertUnprocessable()
+            ->assertJsonValidationErrors(['email']);
+    }
+
+    public function test_update_profile_requires_authentication(): void
+    {
+        $response = $this->patchJson(route('auths.update-user'), [
+            'name' => 'New Name',
+        ]);
+
+        $response->assertUnauthorized();
     }
 }

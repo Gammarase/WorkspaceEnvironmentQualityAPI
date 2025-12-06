@@ -16,7 +16,8 @@ class AuthController extends Controller
 {
     public function register(AuthRegisterRequest $request): JsonResponse
     {
-        $user = User::create($request->validated());
+        $data = array_filter($request->validated());
+        $user = User::create($data);
 
         $token = $user->createToken('api-token')->plainTextToken;
 

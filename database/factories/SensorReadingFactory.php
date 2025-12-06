@@ -3,8 +3,12 @@
 namespace Database\Factories;
 
 use App\Models\Device;
+use App\Models\SensorReading;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @extends Factory<SensorReading>
+ */
 class SensorReadingFactory extends Factory
 {
     /**

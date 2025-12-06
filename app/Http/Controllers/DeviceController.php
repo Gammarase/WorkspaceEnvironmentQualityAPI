@@ -35,7 +35,7 @@ class DeviceController extends Controller
      */
     public function index(Request $request): DeviceCollection
     {
-        $devices = $request->user()->devices()->with('recommendations')->get();
+        $devices = $request->user()->devices()->with('recommendations')->paginate(10);
 
         return new DeviceCollection($devices);
     }
