@@ -45,7 +45,7 @@ class DeviceController extends Controller
         $validated = $request->validated();
         $validated['user_id'] = $request->user()->id;
 
-        $device = Device::create($validated);
+        $device = Device::create($validated)->fresh();
 
         return response()->json(new DeviceResource($device), 201);
     }
