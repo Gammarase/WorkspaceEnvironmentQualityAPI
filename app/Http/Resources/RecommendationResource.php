@@ -30,7 +30,7 @@ class RecommendationResource extends JsonResource
              *Enum: `'pending'`, `'acknowledged'`, `'dismissed'`
              */
             'status' => $this->status,
-            'metadata' => $this->metadata,
+            'metadata' => is_string($this->metadata) ? json_decode($this->metadata) : $this->metadata,
             'acknowledged_at' => $this->acknowledged_at,
             'dismissed_at' => $this->dismissed_at,
             'user' => UserResource::make($this->whenLoaded('user')),

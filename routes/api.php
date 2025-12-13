@@ -19,6 +19,7 @@ Route::prefix('auths')->controller(AuthController::class)->middleware('auth:sanc
     Route::patch('update-user', 'updateUser')->name('update-user');
 });
 
+Route::resource('sensor-readings', SensorReadingController::class)->only(['store']);
 // Protected Routes
 Route::middleware('auth:sanctum')->group(function () {
     // Devices
@@ -29,7 +30,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('current', 'current');
         Route::get('history', 'history');
     });
-    Route::resource('sensor-readings', SensorReadingController::class)->only(['store']);
 
     // Recommendations
     Route::prefix('recommendations')->name('recommendations.')->controller(RecommendationController::class)->group(function () {

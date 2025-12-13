@@ -46,7 +46,7 @@ class FetchWeatherDataCommand extends Command
                 ->whereBetween('latitude', [$lat - 0.01, $lat + 0.01])
                 ->whereBetween('longitude', [$lng - 0.01, $lng + 0.01])
                 ->where('fetched_at', '>=', now()->subHour())
-                ->first();
+                ->exists();
 
             if ($existingWeather) {
                 $skipped++;
