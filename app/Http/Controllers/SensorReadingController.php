@@ -18,7 +18,7 @@ class SensorReadingController extends Controller
     {
         $validated = $request->validated();
 
-        $device = Device::findOrFail($validated['device_id']);
+        $device = Device::where($validated['device_id'], 'device_id')->firstOrFail();
 
         if ($device->user_id !== $request->user()->id) {
             abort(403, 'Unauthorized');

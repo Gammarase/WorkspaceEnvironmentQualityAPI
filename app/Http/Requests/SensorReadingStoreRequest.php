@@ -20,7 +20,7 @@ class SensorReadingStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'device_id' => ['required', 'integer', 'exists:devices,id'],
+            'device_id' => ['required', 'string', 'exists:devices,device_id'],
             'temperature' => ['required', 'numeric', 'between:-999.99,999.99'],
             'humidity' => ['required', 'numeric', 'between:-999.99,999.99'],
             'tvoc_ppm' => ['nullable', 'integer', 'gt:0'],
