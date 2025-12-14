@@ -16,19 +16,22 @@ class SensorReadingController extends Controller
 {
     public function store(SensorReadingStoreRequest $request): JsonResponse
     {
-        $validated = $request->validated();
+        $device = Device::where('device_id', $request->validated('device_id'))->firstOrFail();
 
-        $device = Device::where($validated['device_id'], 'device_id')->firstOrFail();
+        $data = $request->only([
+            'temperature',
+            'humidity',
+            'tvoc_ppm',
+            'light',
+            'noise',
+            'reading_timestamp',
+        ]);
 
-        if ($device->user_id !== $request->user()->id) {
-            abort(403, 'Unauthorized');
+        if (! isset($data['reading_timestamp'])) {
+            $data['reading_timestamp'] = now();
         }
 
-        if (! isset($validated['reading_timestamp'])) {
-            $validated['reading_timestamp'] = now();
-        }
-
-        $sensorReading = SensorReading::create($validated);
+        $sensorReading = $device->sensorReadings()->create($data);
 
         $device->update(['last_seen_at' => now()]);
 
